@@ -1,0 +1,103 @@
+version: "3.8"
+services:
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: bonjour
+      PGDATA: /var/lib/kirbi/postgresql/data
+    volumes:
+      - shared:/var/lib/kirbi/postgresql/data
+    ports:
+      - '5432:5432'
+    networks:
+      - rso-kirbi
+
+  #  pgadmin4:
+  #    image: elestio/pgadmin:latest
+  #    restart: always
+  #    environment:
+  #      PGADMIN_DEFAULT_EMAIL: admin@email.com
+  #      PGADMIN_DEFAULT_PASSWORD: bonjour
+  #      PGADMIN_LISTEN_PORT: 8080
+  #    volumes:
+  #      - ./servers.json:/pgadmin4/servers.json
+  #    networks:
+  #      - rso-kirbi
+
+  auth:
+    image: reg.x9.pm/api_licenses:vFinale
+    restart: unless-stopped
+    container_name: "auth"
+    environment:
+      - DB_HOST=database
+      - DB_USER=postgres
+      - DB_PASSWORD=bonjour
+      - DB_PROJECT=project
+      - DB_PORT=5432
+      - DEBUG=false
+      - ADMIN_PASSWORD=Bonjour123
+    volumes:
+      - shared:/var/lib/kirbi/shared
+      - data_auth:/var/lib/kirbi/data
+    networks:
+      - rso-kirbi
+
+  app-api-licenses:
+    image: reg.x9.pm/api_licenses:vFinale
+    volumes:
+      - shared:/var/lib/kirbi/shared:ro
+      - data_auth:/var/lib/kirbi/data:ro
+    networks:
+      - rso-kirbi
+
+  app-api-ipam:
+    image: reg.x9.pm/api_ipam:vFinale
+    volumes:
+      - shared:/var/lib/kirbi/shared:ro
+      - data_auth:/var/lib/kirbi/data:ro
+    networks:
+      - rso-kirbi
+
+  app-api-logiciel:
+    image: reg.x9.pm/api_logiciel:vFinale
+    volumes:
+      - shared:/var/lib/kirbi/shared:ro
+      - data_auth:/var/lib/kirbi/data:ro
+    networks:
+      - rso-kirbi
+
+  app-api-report:
+    image: reg.x9.pm/api_report:vFinale
+    volumes:
+      - shared:/var/lib/kirbi/shared:ro
+      - data_auth:/var/lib/kirbi/data:ro
+    networks:
+      - rso-kirbi
+
+  app-api-users:
+    image: reg.x9.pm/api_users:vFinale
+    volumes:
+      - shared:/var/lib/kirbi/shared:ro
+      - data_auth:/var/lib/kirbi/data:ro
+    networks:
+      - rso-kirbi
+
+  app-api-computers:
+    image: reg.x9.pm/api_comuters:vFinale
+    volumes:
+      - shared:/var/lib/kirbi/shared:ro
+      - data_auth:/var/lib/kirbi/data:ro
+    networks:
+      - rso-kirbi
+
+networks:
+  rso-kirbi:
+
+
+volumes:
+  shared:
+  data_auth:
